@@ -1,0 +1,64 @@
+<div class="layui-btn-group">
+    <button type="button" class="layui-btn" data-action="manage.auth.role.store" id="system-role-save">
+        <i class="layui-icon layui-icon-addition"></i> 新增
+    </button>
+</div>
+<table class="layui-hide" id="L-table-role" lay-filter="L-table-role"></table>
+<div id="L-table-role-action" class="layui-hide">
+    <a class="layui-btn layui-btn-xs" lay-event="set-power" data-action="manage.auth.role.set-api">权限设置</a>
+    <a class="layui-btn layui-btn-xs" lay-event="update" data-action="manage.auth.role.update">编辑</a>
+    <a class="layui-btn layui-btn-xs" lay-event="delete" data-action="manage.auth.role.destroy">删除</a>
+</div>
+<script>
+    L.openPage[L.page] = {
+        init: function (data) {
+            L.loadTable({
+                url: '/role',
+                where: data || {},
+                elem: '#L-table-role',
+                cols: [[
+                    {field: 'id', title: 'ID', width: 100}
+                    , {field: 'name', title: '角色名称'}
+                    , {field: 'created_at', title: '添加时间'}
+                    , {field: 'updated_at', title: '最近修改时间'}
+                    , {title: '操作', width: 200, align: 'center', toolbar: '#L-table-role-action'}
+                ]]
+                , height: 'full-230'
+            });
+        }
+    };
+
+    layui.table.on('tool(L-table-role)', function (obj) {
+        if (obj.event == 'update') {
+            L.pageObj().formData = obj.data;
+            L.loadPage({
+                url: '/page/role/save'
+            }, 'open', '编辑角色');
+        } else if (obj.event == 'delete') {
+            L.deleteRow({
+                url: '/role/' + obj.data.id,
+                success: function (ajaxData) {
+                    if (ajaxData.code === 0) {
+                        layer.msg(ajaxData.message, {icon: 1});
+                        L.pageObj().init();
+                    }
+                }
+            });
+        } else if (obj.event == 'set-power') {
+            L.pageObj().formData = obj.data;
+            L.loadPage({
+                url: '/page/role/set-power'
+            }, 'open', '权限设置');
+        }
+    });
+
+    L.pageObj().init();
+
+    //新增
+    $("#system-role-save").click(function () {
+        delete L.pageObj().formData;
+        L.loadPage({
+            url: '/page/role/save'
+        }, 'open', '新增角色');
+    });
+</script>

@@ -1,0 +1,71 @@
+<div class="open-div-main">
+    <table class="layui-hide" id="L-table-role-set-power" lay-filter="L-table-role-set-power"></table>
+    <div class="layui-btn-group" style="margin-top: 15px">
+        <button type="button" class="layui-btn" data-action="system-role-set-power" id="system-role-set-power">
+            <i class="layui-icon layui-icon-ok-circle"></i> 保存
+        </button>
+    </div>
+</div>
+<script>
+    let setPower = {
+        init: function (data) {
+            L.loadTable({
+                url: '/role/' + L.pageObj().formData.id + '/get-api',
+                type: 'GET',
+                loadTitle: '加载中...',
+                where: data || {},
+                elem: '#L-table-role-set-power',
+                page: false, // 取消分页
+                cols: [[
+                    {type: 'checkbox'},
+                    {field: 'id', title: 'ID', width: 100}
+                    , {
+                        field: 'name', title: '菜单名称', templet: function (d) {
+                            return d.level + d.name;
+                        }
+                    }
+                    , {field: 'key', title: '标识'}
+                    // , {
+                    //     field: 'menu_type', title: '菜单类型', width: 130, templet: function (d) {
+                    //         return setPower.config.menu_type[d.type];
+                    //     }
+                    // }
+                ]]
+                , height: ''
+                , id: 'L-table-role-set-power'
+                , handleData: function (data) {
+                    return toTreeList(data)
+                }
+            }, setPower);
+        }
+    };
+
+    setPower.init();
+
+    $("#system-role-set-power").click(function () {
+        var checkStatus = layui.table.checkStatus('L-table-role-set-power');
+        if (checkStatus.data.length > 0) {
+            let apis = [];
+            $.each(checkStatus.data, function (index, item) {
+                apis.push(item.id);
+            });
+            L.ajax({
+                url: '/role/' + L.pageObj().formData.id + '/set-api',
+                data: {
+                    apis: apis.toString()
+                },
+                type: 'Post',
+                success: function (ajaxData) {
+                    if (ajaxData.code === 0) {
+                        layer.msg(ajaxData.message, {icon: 1});
+                        layer.closeAll('page');
+                    } else {
+                        layer.msg(ajaxData.message, {icon: 2});
+                    }
+                },
+            });
+        } else {
+            layer.msg('请至少选择一项', {icon: 2});
+        }
+    });
+</script>

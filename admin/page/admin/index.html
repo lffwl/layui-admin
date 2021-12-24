@@ -1,0 +1,65 @@
+<div class="layui-btn-group">
+    <button type="button" class="layui-btn" data-action="manage.auth.admin.store" id="system-admin-save">
+        <i class="layui-icon layui-icon-addition"></i> 新增
+    </button>
+</div>
+<table class="layui-hide" id="L-table-admin" lay-filter="L-table-admin"></table>
+<div id="L-table-admin-action" class="layui-hide">
+    <a class="layui-btn layui-btn-xs" lay-event="set-role" data-action="manage.auth.admin.set-role">角色设置</a>
+    <a class="layui-btn layui-btn-xs" lay-event="update" data-action="manage.auth.admin.update">编辑</a>
+    <a class="layui-btn layui-btn-xs" lay-event="delete" data-action="manage.auth.admin.destroy">删除</a>
+</div>
+<script>
+    L.openPage[L.page] = {
+        init: function (data) {
+            L.loadTable({
+                url: '/admin',
+                type: 'GET',
+                loadTitle: '加载中...',
+                where: data || {},
+                elem: '#L-table-admin',
+                cols: [[
+                    {field: 'id', title: 'ID', width: 100}
+                    , {field: 'user_name', title: '名称'}
+                    , {field: 'created_at', title: '添加时间'}
+                    , {field: 'updated_at', title: '最近修改时间'}
+                    , {title: '操作', width: 200, align: 'center', toolbar: '#L-table-admin-action'}
+                ]]
+            });
+        }
+    };
+
+    layui.table.on('tool(L-table-admin)', function (obj) {
+        if (obj.event == 'update') {
+            L.pageObj().formData = obj.data;
+            L.loadPage({
+                url: '/page/admin/save'
+            }, 'open', '编辑管理员');
+        } else if (obj.event == 'delete') {
+            L.deleteRow({
+                url: '/admin/' + obj.data.id,
+                success: function (ajaxData) {
+                    if (ajaxData.code === 0) {
+                        layer.msg(ajaxData.message, {icon: 1});
+                        L.pageObj().init();
+                    }
+                }
+            });
+        } else if (obj.event == 'set-role') {
+            L.pageObj().formData = obj.data;
+            L.loadPage({
+                url: '/page/admin/set-role'
+            }, 'open', '角色设置');
+        }
+    });
+
+    L.pageObj().init();
+
+    //新增
+    $("#system-admin-save").click(function () {
+        delete L.pageObj().formData;
+        L.loadPage({
+            url: '/page/admin/save'
+        }, 'open', '新增管理员');
+    });
+</script>

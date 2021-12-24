@@ -1,0 +1,57 @@
+<div class="open-div-main">
+    <table class="layui-hide" id="L-table-admin-set-role" lay-filter="L-table-admin-set-role"></table>
+    <div class="layui-btn-group" style="margin-top: 15px">
+        <button type="button" class="layui-btn" data-action="system-admin-set-role" id="system-admin-set-role">
+            <i class="layui-icon layui-icon-ok-circle"></i> 保存
+        </button>
+    </div>
+</div>
+<script>
+    let setRole = {
+        init: function (data) {
+            L.loadTable({
+                url: '/admin/' + L.pageObj().formData.id + '/get-role',
+                loadTitle: '加载中...',
+                where: data || {},
+                elem: '#L-table-admin-set-role',
+                page: false,
+                cols: [[
+                    {type: 'checkbox'},
+                    {field: 'id', title: 'ID', width: 100}
+                    , {field: 'name', title: '角色名称'}
+                ]]
+                , height: ''
+                , id: 'L-table-admin-set-role'
+            }, setRole);
+        }
+    };
+
+    setRole.init();
+
+    $("#system-admin-set-role").click(function () {
+        var checkStatus = layui.table.checkStatus('L-table-admin-set-role');
+        if (checkStatus.data.length > 0) {
+            let roles = [];
+            $.each(checkStatus.data, function (index, item) {
+                roles.push(item.id);
+            });
+            L.ajax({
+                url: '/admin/' + L.pageObj().formData.id + '/set-role',
+                data: {
+                    roles: roles.toString()
+                },
+                type: 'Post',
+                success: function (ajaxData) {
+                    if (ajaxData.code === 0) {
+                        layer.msg(ajaxData.message, {icon: 1});
+                        layer.closeAll('page');
+                    } else {
+                        layer.msg(ajaxData.message, {icon: 2});
+                    }
+                },
+            });
+        } else {
+            layer.msg('请至少选择一项', {icon: 2});
+        }
+    });
+</script>
